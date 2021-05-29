@@ -1,0 +1,52 @@
+{
+	"version": 1,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 19,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "debug",
+			"displayName": "Debug",
+			"description": "Debug build using Ninja/clang",
+			"generator": "Ninja",
+			"binaryDir": "out/db",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": {
+					"type": "STRING",
+					"value": "clang"
+				},
+				"CMAKE_CXX_COMPILER": {
+					"type": "STRING",
+					"value": "clang++"
+				},
+				"CMAKE_BUILD_TYPE": {
+					"type": "STRING",
+					"value": "Debug"
+				}
+			}
+		},
+		{
+			"name": "release",
+			"displayName": "Release",
+			"description": "Release build using Ninja/clang",
+			"generator": "Ninja",
+			"binaryDir": "out/rl",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": {
+					"type": "STRING",
+					"value": "clang"
+				},
+				"CMAKE_CXX_COMPILER": {
+					"type": "STRING",
+					"value": "clang++"
+				},
+				"CMAKE_BUILD_TYPE": {
+					"type": "STRING",
+					"value": "Release"
+				}
+			}
+		}
+	]
+}
