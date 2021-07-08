@@ -11,16 +11,15 @@ sf::ContextSettings context_settings() {
 }
 } // namespace
 
-context::context(std::string_view title)
-	: sf::RenderWindow(sf::VideoMode(width, height), title.data(), style, context_settings()) {
+context_t::context_t(std::string_view title) : sf::RenderWindow(sf::VideoMode(width, height), title.data(), style, context_settings()) {
 	auto view = getView();
 	view.setCenter(0.0f, 0.0f);
 	setView(view);
 }
 
-bool context::running() const { return isOpen() && !m_closed; }
+bool context_t::running() const { return isOpen() && !m_closed; }
 
-std::vector<sf::Event> context::poll() {
+std::vector<sf::Event> context_t::poll() {
 	sf::Event event;
 	std::vector<sf::Event> ret;
 	while (pollEvent(event)) {
@@ -28,6 +27,7 @@ std::vector<sf::Event> context::poll() {
 		case sf::Event::Closed: m_closed = true; break;
 		case sf::Event::KeyPressed:
 			if (event.key.code == sf::Keyboard::Escape) { m_closed = true; };
+			ret.push_back(event);
 			break;
 		default: ret.push_back(event); break;
 		}
@@ -35,18 +35,6 @@ std::vector<sf::Event> context::poll() {
 	return ret;
 }
 
-context::drawer::drawer(context* ctx, sf::Color clear_colour) : ctx(ctx) {
-	assert(ctx != nullptr);
-	ctx->clear(clear_colour);
-}
-
-context::drawer::~drawer() { ctx->display(); }
-
-void context::render(scene_t const& scene, sf::Color clear_colour) {
-	clear(clear_colour);
-	for (auto const& [_, drawable] : scene.m_map) {
-		this->sf::RenderWindow::draw(*drawable);
-	}
-	display();
-}
+drawer_t::drawer_t(context_t* ctx, sf::Color clear_colour) : ctx(ctx) { ctx->clear(clear_colour); }
+drawer_t::~drawer_t() { ctx->display(); }
 } // namespace misc

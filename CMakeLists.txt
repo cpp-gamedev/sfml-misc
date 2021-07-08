@@ -11,8 +11,6 @@ set(CMAKE_BUILD_TYPE Debug CACHE STRING "")
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.?pp")
 
-message(STATUS "Sources: ${SOURCES}")
-
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
