@@ -5,9 +5,9 @@
 #include <types.hpp>
 
 namespace misc {
-class scene_t;
+struct drawer_t;
 
-class context : public sf::RenderWindow {
+class context_t : public sf::RenderWindow {
   public:
 	static constexpr s32 width = 1280;
 	static constexpr s32 height = 720;
@@ -15,25 +15,35 @@ class context : public sf::RenderWindow {
 
 	using sf::RenderWindow::draw;
 
-	struct drawer {
-		drawer(context* ctx, sf::Color clear_colour);
-		~drawer();
-
-	  private:
-		context* ctx;
-	};
-
-	context() = default;
-	context(std::string_view title);
+	context_t() = default;
+	context_t(std::string_view title);
 
 	bool running() const;
 	std::vector<sf::Event> poll();
 
-	void render(scene_t const& scene, sf::Color clear_colour = sf::Color::Black);
-
-	drawer draw(sf::Color clear_colour = sf::Color::Black) { return drawer(this, clear_colour); }
+	drawer_t drawer(sf::Color clear_colour = sf::Color::Black);
 
   private:
 	bool m_closed = false;
 };
+
+struct drawer_t {
+	drawer_t(context_t* ctx, sf::Color clear_colour);
+	~drawer_t();
+
+	explicit operator bool() const noexcept { return ctx != nullptr; }
+	template <typename... Args>
+	void draw(Args&&... args) const;
+
+  private:
+	context_t* ctx;
+};
+
+// impl
+
+inline drawer_t context_t::drawer(sf::Color clear_colour) { return drawer_t(this, clear_colour); }
+template <typename... Args>
+void drawer_t::draw(Args&&... args) const {
+	ctx->draw(std::forward<Args>(args)...);
+}
 } // namespace misc
