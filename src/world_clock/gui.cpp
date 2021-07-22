@@ -2,6 +2,7 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include <context.hpp>
+#include <gfx/follow_eye.hpp>
 #include <world_clock/gui.hpp>
 
 namespace misc {
@@ -78,6 +79,18 @@ struct facade_t {
 		drawer.draw(t);
 	}
 
+	void draw_eyes(sf::Vector2f target, bool blink) const {
+		follow_eye_t left;
+		left.pos = {-80.0f, 50.0f};
+		left.pos *= in.scale;
+		left.update(target);
+		left.draw(drawer, blink);
+		follow_eye_t right;
+		right.pos = {-left.pos.x, left.pos.y};
+		right.update(target);
+		right.draw(drawer, blink);
+	}
+
 	void draw_clock() const {
 		if (in.face_tex) {
 			draw<sf::Sprite>();
@@ -105,6 +118,7 @@ struct facade_t {
 void world_clock_drawer_t::operator()(drawer_t& drawer, world_clock_t const& clock, in_t const& in) {
 	facade_t f{drawer, in};
 	f.draw_clock();
+	f.draw_eyes(in.mouse_pos, in.blink);
 	for (auto const& entry : clock) { f.draw_hand(entry); }
 }
 } // namespace misc

@@ -3,6 +3,8 @@
 #include <set>
 #include <context.hpp>
 #include <delta_time.hpp>
+#include <gfx/follow_eye.hpp>
+#include <maths/maths.hpp>
 #include <world_clock/gui.hpp>
 #include <world_clock/io.hpp>
 
@@ -58,21 +60,47 @@ class clock_ticker_t {
 			if (m_input->any_held(key_t::Up, key_t::Right, key_t::W, key_t::D)) { delta += 1.0f; }
 			add(translation_scale * delta * dt.count());
 		}
+		auto next_blink = [this]() { return maths::random_range(m_blink.interval.first.count(), m_blink.interval.second.count()); };
+		if (m_blink.next_blink_in <= sec_t{}) {
+			m_blink.next_blink_in = sec_t{next_blink()};
+			m_blink.stop_blink_in = m_blink.duration;
+			update(flag::blinking);
+		}
+		if (test(flag::blinking)) {
+			m_blink.stop_blink_in -= dt;
+			if (m_blink.stop_blink_in <= sec_t{}) {
+				m_blink.next_blink_in = sec_t{next_blink()};
+				update(flag::none, flag::blinking);
+			}
+		} else {
+			m_blink.next_blink_in -= dt;
+		}
 	}
+
+	bool blink() const noexcept { return test(flag::blinking); }
+
+	struct {
+		pair_t<sec_t> interval = {sec_t{3.0f}, sec_t{8.0f}};
+		sec_t duration = sec_t{0.15f};
+
+		sec_t next_blink_in{};
+		sec_t stop_blink_in{};
+	} m_blink;
 
   private:
 	using flags_t = u8;
-	enum flag : flags_t { none = 0, zeroing = 1 << 0 };
+	enum flag : flags_t { none = 0, zeroing = 1 << 0, blinking = 1 << 1 };
 
 	input_t const* m_input;
 	world_clock_t* m_clock;
 	world_hour_t m_offset;
-	flags_t flags = flag::none;
 
-	bool test(flags_t f) const noexcept { return (flags & f) == f; }
+	flags_t m_flags = flag::none;
+
+	bool test(flags_t f) const noexcept { return (m_flags & f) == f; }
 	void update(flags_t set, flags_t unset = 0) noexcept {
-		flags |= set;
-		flags &= ~unset;
+		m_flags |= set;
+		m_flags &= ~unset;
 	}
 
 	void add(hour_t offset) noexcept {
@@ -96,7 +124,12 @@ int main() {
 	while (ctx.running()) {
 		input.update(ctx.poll());
 		tick(++dt);
-		if (auto drawer = ctx.drawer()) { world_clock_drawer_t{}(drawer, clock, {}); }
+		if (auto drawer = ctx.drawer()) {
+			world_clock_drawer_t::in_t in;
+			in.blink = tick.blink();
+			in.mouse_pos = ctx.mouse_pos();
+			world_clock_drawer_t{}(drawer, clock, in);
+		}
 	}
 	std::cout << "\nCompleted successfully\n";
 }

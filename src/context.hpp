@@ -23,6 +23,8 @@ class context_t : public sf::RenderWindow {
 
 	drawer_t drawer(sf::Color clear_colour = sf::Color::Black);
 
+	sf::Vector2f mouse_pos() const noexcept;
+
   private:
 	bool m_closed = false;
 };
