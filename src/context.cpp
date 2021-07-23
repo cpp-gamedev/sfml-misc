@@ -1,5 +1,6 @@
 #include <cassert>
 #include <context.hpp>
+#include <maths/maths.hpp>
 #include <scene.hpp>
 
 namespace misc {
@@ -33,6 +34,13 @@ std::vector<sf::Event> context_t::poll() {
 		}
 	}
 	return ret;
+}
+
+sf::Vector2f context_t::mouse_pos() const noexcept {
+	static auto const offset = sf::Vector2f(f32(width) * 0.5f, f32(height) * 0.5f);
+	auto ret = maths::cast<sf::Vector2f>(sf::Mouse::getPosition(*this));
+	ret -= offset;
+	return {ret.x, -ret.y};
 }
 
 drawer_t::drawer_t(context_t* ctx, sf::Color clear_colour) : ctx(ctx) { ctx->clear(clear_colour); }
