@@ -17,8 +17,6 @@ struct world_clock_drawer_t {
 		sf::Vector2f mouse_pos{};
 		sf::Color face_tint = sf::Color(0xccccbbff);
 		sf::Color marker_tint = sf::Color(0x555555ff);
-		sf::Texture const* face_tex{};
-		sf::Texture const* hand_tex{};
 		f32 hand_height = 250.0f;
 		f32 marker_radius = 10.0f;
 		f32 face_pad = 0.2f;
