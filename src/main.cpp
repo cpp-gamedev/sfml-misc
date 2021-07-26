@@ -81,7 +81,7 @@ class clock_ticker_t {
 
 	struct {
 		pair_t<sec_t> interval = {sec_t{3.0f}, sec_t{8.0f}};
-		sec_t duration = sec_t{0.15f};
+		sec_t duration = sec_t{0.1f};
 
 		sec_t next_blink_in{};
 		sec_t stop_blink_in{};
