@@ -5,6 +5,7 @@
 #include <delta_time.hpp>
 #include <gfx/follow_eye.hpp>
 #include <maths/maths.hpp>
+#include <pini/pini.hpp>
 #include <world_clock/gui.hpp>
 #include <world_clock/io.hpp>
 

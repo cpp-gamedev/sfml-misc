@@ -1,3 +1,6 @@
 [submodule "ext/sfml"]
 	path = ext/sfml
 	url = https://github.com/SFML/SFML
+[submodule "ext/pini"]
+	path = ext/pini
+	url = https://github.com/cpp-gamedev/pini

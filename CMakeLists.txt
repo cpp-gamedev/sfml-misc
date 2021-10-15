@@ -5,6 +5,7 @@ set(BUILD_SHARED_LIBS OFF)
 
 project(world-clock)
 
+add_subdirectory(ext/pini)
 add_subdirectory(ext/sfml)
 
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "")
@@ -29,8 +30,8 @@ endif()
 # exe
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.?pp")
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE src)
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics)
+target_include_directories(${PROJECT_NAME} PRIVATE src ext/pini)
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics pini::pini)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
