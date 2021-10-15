@@ -21,10 +21,10 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
   execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     RESULT_VARIABLE UPDATE_SUBMODULES_RESULT
-)
-if(NOT UPDATE_SUBMODULES_RESULT EQUAL "0")
-  message(FATAL_ERROR "git submodule update failed!")
-endif()
+  )
+  if(NOT UPDATE_SUBMODULES_RESULT EQUAL "0")
+    message(FATAL_ERROR "git submodule update failed!")
+  endif()
 endif()
 
 # exe
