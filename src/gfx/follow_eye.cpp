@@ -3,6 +3,7 @@
 #include <gfx/shape.hpp>
 #include <maths/maths.hpp>
 
+
 namespace misc {
 sf::Vector2f follow_eye_t::update(sf::Vector2f target) noexcept { return (dir = maths::normalize(target - pos)); }
 void follow_eye_t::draw(drawer_t& drawer, bool blink) {
