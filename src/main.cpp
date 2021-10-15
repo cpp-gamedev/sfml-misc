@@ -1,5 +1,5 @@
 #include <cassert>
-#include <filesystem>
+#include <cstdint>
 #include <iostream>
 #include <set>
 #include <context.hpp>
@@ -113,13 +113,22 @@ class clock_ticker_t {
 };
 } // namespace
 
+u32 random_number(u32 min, u32 max) {
+	std::random_device r;
+	std::default_random_engine re(r());
+	std::uniform_int_distribution<u32> uniform_dist(min, max);
+	return uniform_dist(re);
+}
+
 bool load_timezones(std::filesystem::path const& filename, world_clock_t& clock) {
 	pn::pini timezones;
 	if (!timezones.load_file(filename)) { return false; }
 
 	for (auto& pair : timezones) {
-		std::cout << pair.first << " " << pair.second << '\n';
-		clock.add(pair.first, 0xff8800ff, timezones.get_double(pair.first));
+		u32 color = random_number(255, UINT32_MAX);
+		color |= 0xff;
+		std::cout << pair.first << " " << pair.second << " " << std::hex << color << '\n';
+		clock.add(pair.first, color, timezones.get_double(pair.first));
 	}
 	return true;
 }
