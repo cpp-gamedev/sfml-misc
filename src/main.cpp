@@ -1,4 +1,5 @@
 #include <cassert>
+#include <filesystem>
 #include <iostream>
 #include <set>
 #include <context.hpp>
@@ -8,6 +9,7 @@
 #include <pini/pini.hpp>
 #include <world_clock/gui.hpp>
 #include <world_clock/io.hpp>
+#include "world_clock/world_clock.hpp"
 
 using namespace misc;
 
@@ -111,13 +113,21 @@ class clock_ticker_t {
 };
 } // namespace
 
+bool load_timezones(std::filesystem::path const& filename, world_clock_t& clock) {
+	pn::pini timezones;
+	if (!timezones.load_file(filename)) { return false; }
+
+	for (auto& pair : timezones) {
+		std::cout << pair.first << " " << pair.second << '\n';
+		clock.add(pair.first, 0xff8800ff, timezones.get_double(pair.first));
+	}
+	return true;
+}
 int main() {
 	misc::context_t ctx("World Clock");
 	ctx.setVerticalSyncEnabled(true);
 	world_clock_t clock;
-	clock.add("PDT", 0xff8800ff, -7.0f);
-	clock.add("IST", 0x44ddffff, 5.5f);
-	clock.add("CET", 0x11ee44ff, 2.0f);
+	load_timezones("src/timezones.pini", clock);
 	std::cout << clock << '\n';
 	input_t input;
 	delta_time_t dt;
