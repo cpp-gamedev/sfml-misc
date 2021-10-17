@@ -2,6 +2,9 @@
 #include <cstdint>
 #include <iostream>
 #include <set>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <context.hpp>
 #include <delta_time.hpp>
 #include <gfx/follow_eye.hpp>
@@ -9,7 +12,10 @@
 #include <pini/pini.hpp>
 #include <world_clock/gui.hpp>
 #include <world_clock/io.hpp>
+#include "SFML/Graphics/Color.hpp"
+#include "types.hpp"
 #include "world_clock/world_clock.hpp"
+#include "world_clock/world_hour.hpp"
 
 using namespace misc;
 
@@ -132,6 +138,22 @@ bool load_timezones(std::filesystem::path const& filename, world_clock_t& clock)
 	}
 	return true;
 }
+u32 hex_to_int(std::string_view const& hex_value) {
+	u32 assigned_color;
+	std::stringstream ss;
+	ss << std::hex << hex_value;
+	ss >> assigned_color;
+	return assigned_color;
+}
+sf::Color generate_color(std::filesystem::path const& themefile, world_clock_t const& clock) {
+	pn::pini colors;
+	if (!colors.load_file(themefile)) { return sf::Color::White; }
+	world_hour_t primary_hour = clock.begin()->hour;
+	std::string hour_str = std::to_string(static_cast<int>(primary_hour.hour()));
+	u32 assigned_color = hex_to_int(colors.get_string(hour_str));
+	sf::Color clock_color(assigned_color);
+	return clock_color;
+}
 int main() {
 	misc::context_t ctx("World Clock");
 	ctx.setVerticalSyncEnabled(true);
@@ -144,7 +166,7 @@ int main() {
 	while (ctx.running()) {
 		input.update(ctx.poll());
 		tick(++dt);
-		if (auto drawer = ctx.drawer()) {
+		if (auto drawer = ctx.drawer(generate_color("src/colors.pini", clock))) {
 			world_clock_drawer_t::in_t in;
 			in.blink = tick.blink();
 			in.mouse_pos = ctx.mouse_pos();
