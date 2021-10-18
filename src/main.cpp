@@ -2,6 +2,9 @@
 #include <cstdint>
 #include <iostream>
 #include <set>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <context.hpp>
 #include <delta_time.hpp>
 #include <gfx/follow_eye.hpp>
@@ -9,7 +12,10 @@
 #include <pini/pini.hpp>
 #include <world_clock/gui.hpp>
 #include <world_clock/io.hpp>
+#include "SFML/Graphics/Color.hpp"
+#include "types.hpp"
 #include "world_clock/world_clock.hpp"
+#include "world_clock/world_hour.hpp"
 
 using namespace misc;
 
@@ -120,10 +126,7 @@ u32 random_number(u32 min, u32 max) {
 	return uniform_dist(re);
 }
 
-bool load_timezones(std::filesystem::path const& filename, world_clock_t& clock) {
-	pn::pini timezones;
-	if (!timezones.load_file(filename)) { return false; }
-
+bool load_timezones(pn::pini const& timezones, world_clock_t& clock) {
 	for (auto& pair : timezones) {
 		u32 color = random_number(255, UINT32_MAX);
 		color |= 0xff;
@@ -132,11 +135,32 @@ bool load_timezones(std::filesystem::path const& filename, world_clock_t& clock)
 	}
 	return true;
 }
+
+u32 hex_to_int(std::string_view const& hex_value) {
+	u32 assigned_color;
+	std::stringstream ss;
+	ss << std::hex << hex_value;
+	ss >> assigned_color;
+	return assigned_color;
+}
+
+sf::Color generate_color(pn::pini const& colors, world_clock_t const& clock) {
+	if (colors.empty()) { return sf::Color::White; }
+	world_hour_t const primary_hour = clock.begin()->hour;
+	u32 const assigned_color = hex_to_int(colors.get_string(std::to_string(static_cast<int>(primary_hour.hour()))));
+	sf::Color const clock_color(assigned_color);
+	return clock_color;
+}
+
 int main() {
 	misc::context_t ctx("World Clock");
 	ctx.setVerticalSyncEnabled(true);
 	world_clock_t clock;
-	load_timezones("src/timezones.pini", clock);
+	pn::pini colors;
+	colors.load_file("src/colors.pini");
+	pn::pini timezones;
+	timezones.load_file("src/timezones.pini");
+	load_timezones(timezones, clock);
 	std::cout << clock << '\n';
 	input_t input;
 	delta_time_t dt;
@@ -144,7 +168,7 @@ int main() {
 	while (ctx.running()) {
 		input.update(ctx.poll());
 		tick(++dt);
-		if (auto drawer = ctx.drawer()) {
+		if (auto drawer = ctx.drawer(generate_color(colors, clock))) {
 			world_clock_drawer_t::in_t in;
 			in.blink = tick.blink();
 			in.mouse_pos = ctx.mouse_pos();
